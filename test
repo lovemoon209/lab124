@@ -1,0 +1,56 @@
+ test_notes.cpp
+#define UNIT_TEST
+#include "lab124.cpp"
+#include <gtest/gtest.h>
+#include <fstream>
+#include <cstring>
+
+const char* TEST_FILE = "test.bin";
+
+class FileTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        std::ofstream(TEST_FILE, std::ios::binary | std::ios::trunc).close();
+    }
+};
+
+
+TEST_F(FileTest, SortByPhone) {
+    std::ofstream fout(TEST_FILE, std::ios::binary);
+
+    Note a = {"Ivanov", "Ivan", "555", {1,1,2000}};
+    Note b = {"Petrov", "Petr", "111", {2,2,1999}};
+
+    fout.write((char*)&a, sizeof(Note));
+    fout.write((char*)&b, sizeof(Note));
+    fout.close();
+
+    sortFileByPhone(TEST_FILE);
+
+    std::ifstream fin(TEST_FILE, std::ios::binary);
+    Note first;
+    fin.read((char*)&first, sizeof(Note));
+    fin.close();
+
+    EXPECT_STREQ(first.phone, "111");
+}
+
+
+TEST_F(FileTest, FindBySurname) {
+    std::ofstream fout(TEST_FILE, std::ios::binary);
+    Note n = {"Shevchenko", "Taras", "999", {3,3,1998}};
+    fout.write((char*)&n, sizeof(Note));
+    fout.close();
+
+    std::ifstream fin(TEST_FILE, std::ios::binary);
+    Note tmp;
+    bool found = false;
+
+    while (fin.read((char*)&tmp, sizeof(Note))) {
+        if (strcmp(tmp.surname, "Shevchenko") == 0)
+            found = true;
+    }
+
+    EXPECT_TRUE(found);}
+
+admin@MacBook-Air-admin-2 tems % 
